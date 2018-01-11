@@ -1,0 +1,47 @@
+{
+  "name": "@sanity/3rd-party-auth-example",
+  "version": "1.0.0",
+  "author": "Sanity.IO",
+  "description": "Sanity third party authentication server example",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/sanity-io/3rd-party-auth-example"
+  },
+  "keywords": [],
+  "license": "MIT",
+  "private": true,
+  "scripts": {
+    "dev": "nodemon bin/server.js | pino",
+    "start": "node bin/server.js",
+    "test": "NODE_ENV=test jest"
+  },
+  "jest": {
+    "testEnvironment": "node",
+    "setupTestFrameworkScriptFile": "./tests/setup.js",
+    "collectCoverageFrom": [
+      "src/**.js",
+      "!src/server.js",
+      "!src/scripts/**"
+    ]
+  },
+  "dependencies": {
+    "@sanity/client": "^0.123.0",
+    "body-parser": "^1.18.2",
+    "connect-redis": "^3.3.3",
+    "express": "^4.14.0",
+    "express-session": "^1.15.6",
+    "ioredis": "^3.2.2",
+    "ioredis-mock": "^3.6.1",
+    "memorystore": "^1.6.0",
+    "passport": "^0.4.0",
+    "pino": "^4.10.3",
+    "valid-url": "^1.0.9"
+  },
+  "devDependencies": {
+    "jest": "^22.0.5",
+    "nock": "^9.1.6",
+    "nodemon": "^1.14.10",
+    "passport-google-oauth20": "^1.0.0",
+    "supertest": "^3.0.0"
+  }
+}
