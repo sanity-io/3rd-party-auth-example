@@ -80,6 +80,17 @@ const passportSessionCookieExpires = new Date(
 const claimUrl = `https://${projectId}.api.sanity.io/v1/auth/thirdParty/session/claim/`
   + '454eaa24c4f8b9e26fe64b52145638c8b1f18856adb9fea5de5cf38bf250611687ff5da0c54d346ba00a8d382a01a68796f2f2887e52cb4213e99bffd051a717'
 
+const userId = 'e-49bf06169f42167ec6578e8407626fa84ca6a79c53424aaaa545e83bd422dffa'
+
+const sessionPostBody = {
+  userId: userId,
+  userFullName: 'Test Person',
+  userEmail: 'test@gmail.com',
+  userImage: 'https://lh3.googleusercontent.com/-KdpciKxr4wk/AAAAAAAAAAI/AAAAAAAACv8/0zQf2IB6B24/photo.jpg?sz=50',
+  userRole: 'admin',
+  sessionExpires: null
+}
+
 module.exports.accessToken = accessToken
 module.exports.claimUrl = claimUrl
 module.exports.code = code
@@ -89,3 +100,5 @@ module.exports.passportGoogleUser = passportGoogleUser
 module.exports.passportSessionCookieExpires = passportSessionCookieExpires
 module.exports.mockPassportStrategies = mockPassportStrategies
 module.exports.projectId = projectId
+module.exports.userId = userId
+module.exports.sessionPostBody = sessionPostBody

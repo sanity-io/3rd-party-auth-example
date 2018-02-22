@@ -44,9 +44,12 @@ module.exports = (req, res, next) => {
 
     return sanitySession.create(passportUser)
       .then(claimUrl => {
+        log.info(`Sucessfully created Sanity identity for ${passportUser.displayName || passportUser.username}`)
         const origin = req.session.origin
         destroyPassportSessionByReq(req) // Wipe the passport session here
-        res.redirect(addQueryToUrl({origin: origin}, claimUrl))
+        const redirectUrl = addQueryToUrl({origin: origin}, claimUrl)
+        log.info(`Redirecting to: ${redirectUrl}`)
+        res.redirect(redirectUrl)
       })
       .catch(error => {
         destroyPassportSessionByReq(req) // Wipe the passport session here

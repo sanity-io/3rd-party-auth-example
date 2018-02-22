@@ -1,10 +1,8 @@
 const config = require('../../config')
 const hashUserId = require('../util/hashUserId')
-const logger = require('../services/logger')
 const sanityClient = require('@sanity/client')
 
 const client = sanityClient(config.sanityClient)
-const log = logger({ logLevel: config.logLevel })
 
 function findEmail(emails) {
   if (!emails || !emails.length) {
@@ -21,31 +19,50 @@ function findImage(photos) {
   return photos[0].value
 }
 
-const passportToSanityUser = pUser => {
+async function findUserRole(userId) {
+  const query = '*[_type == "system.group" && members[] == $userId] {_id}'
+  return client.fetch(query, {userId})
+    .then(groups => {
+      if (groups.some(grp => grp._id.match('admin'))) {
+        return 'admin'
+      }
+      if (groups.length) {
+        return 'editor'
+      }
+      return null
+    })
+}
+
+async function passportToSanityUser(pUser) {
   const displayName = pUser.displayName || pUser.username
   if (!displayName) {
     const message = `Could not resolve displayName`
     throw new Error(message)
   }
   const email = findEmail(pUser.emails)
+  const userId = hashUserId(email)
+
+  // User role here is just a helper for the Studio GUI.
+  // Not related to actual security!
+  const userRole = await findUserRole(userId)
+
   return {
-    userId: hashUserId(email),
+    userId: userId,
     userFullName: displayName,
     userEmail: email,
-    userImage: findImage(pUser.photos) || null
+    userImage: findImage(pUser.photos) || null,
+    userRole: userRole
   }
 }
 
 module.exports = {
-  create: passportUser => {
-    const sanityUser = passportToSanityUser(passportUser)
+  create: async passportUser => {
+    const sanityUser = await passportToSanityUser(passportUser)
 
     const expires = new Date()
     expires.setTime(expires.getTime() + config.sanitySession.expires)
 
-    const session = Object.assign({}, sanityUser, {sessionExpires})
-
-    log.info(`Logging in ${passportUser.displayName}`)
+    const session = Object.assign({}, sanityUser, {sessionExpires: expires})
 
     return client.request({
       uri: '/auth/thirdParty/session',
@@ -53,13 +70,9 @@ module.exports = {
       json: true,
       body: session
     }).then(result => {
-      log.info(`Sucessfully created Sanity identity: ${sanityUser.userId}`)
-      log.info(`Redirecting to: ${result.endUserClaimUrl}`)
       return result.endUserClaimUrl
     })
     .catch(err => {
-      log.error('Got error from Sanity auth API:')
-      log.error(err)
       throw err
     })
   }

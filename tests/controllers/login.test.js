@@ -1,9 +1,9 @@
 /* eslint-disable max-nested-callbacks */
-jest.mock('../../src/services/sanitySession')
 
 const nock = require('nock')
 const request = require('supertest')
 const url = require('url')
+const MockDate = require('mockdate')
 
 const app = require('../../src/app.js')
 const strategies = require('../../config/passport-strategies')
@@ -21,16 +21,13 @@ const {
   code,
   googleUser,
   origin,
-  passportSessionCookieExpires,
   project,
   projectId,
   sessionLabel,
-  sessionResponseProject
+  sessionResponseProject,
+  userId,
+  sessionPostBody
 } = fixtures
-
-sanitySession.create = jest.fn(() => {
-  return Promise.resolve(claimUrl)
-})
 
 jest.mock(
   '../../config/passport-strategies.js',
@@ -53,11 +50,13 @@ beforeAll(() => {
 })
 
 beforeEach(done => {
+  MockDate.set(1519301171376)
   clearSessionStorage().then(done)
 })
 
 afterEach(() => {
   nock.cleanAll()
+  MockDate.reset()
 })
 
 afterAll(() => {
@@ -171,6 +170,45 @@ describe('API', () => {
     it('should create a Sanity session, destroy the Passport session, and redirect to origin', () => {
       let cookie
       let location
+      const passportSessionCookieExpires = new Date(
+          Date.now() + config.passportSession.maxAge
+        ).toGMTString()
+
+      nock('https://www.googleapis.com:443', { encodedQueryParams: true })
+        .post(
+          '/oauth2/v4/token',
+          'grant_type=authorization_code' +
+            `&redirect_uri=${callbackUrlEncoded}` +
+            `&client_id=${googleClientId}&client_secret=${googleClientSecret}` +
+            `&code=${code}`
+        )
+        .reply(200, {
+          access_token: accessToken // eslint-disable-line camelcase
+        })
+
+      nock('https://www.googleapis.com:443')
+        .get(`/plus/v1/people/me?access_token=${accessToken}`)
+        .reply(200, JSON.stringify(googleUser))
+
+      nock('https://xxx.api.sanity.io:443')
+        .get(`/v1/data/query/production?query=*%5B_type%20%3D%3D%20%22system.group%22%20%26%26%20members%5B%5D%20%3D%3D%20%24userId%5D%20%7B_id%7D&%24userId=%22${userId}%22`)
+        .reply(200, {"ms":13,"query":`*[_type == \"system.group\" \u0026\u0026 members[] == '${userId}'] {_id}`,"result":[{"_id":"_.groups.admins"}]})
+
+        const expires = new Date()
+        expires.setTime(expires.getTime() + config.sanitySession.expires)
+
+        const postBody = Object.assign(
+          {},
+          sessionPostBody,
+          {
+            sessionExpires: expires.toISOString()
+          }
+        )
+
+        nock('https://xxx.api.sanity.io:443')
+          .post('/v1/auth/thirdParty/session', postBody)
+          .reply(200, {endUserClaimUrl: claimUrl})
+
       return agent
         .get(`${config.apiPath}/login/google?origin=${encodeURIComponent(origin)}`)
         .then(res => {
@@ -179,46 +217,12 @@ describe('API', () => {
           return findSessionState(cookie, passportSessionKey).then(state => {
             expect(state).toEqual(location.query.state)
             expect(cookie[0]).toMatch(`Expires=${passportSessionCookieExpires.split(':')[0]}`)
-
-            nock('https://www.googleapis.com:443', { encodedQueryParams: true })
-              .post(
-                '/oauth2/v4/token',
-                'grant_type=authorization_code' +
-                  `&redirect_uri=${callbackUrlEncoded}` +
-                  `&client_id=${googleClientId}&client_secret=${googleClientSecret}` +
-                  `&code=${code}`
-              )
-              .reply(200, {
-                access_token: accessToken // eslint-disable-line camelcase
-              })
-
-            nock('https://www.googleapis.com:443')
-              .get(`/plus/v1/people/me?access_token=${accessToken}`)
-              .reply(200, JSON.stringify(googleUser))
-
             return agent
               .get(`${config.apiPath}/callback/google?code=${code}&state=${state}`)
               .set('Cookie', cookie)
               .expect(302, `Found. Redirecting to ${claimUrl}?origin=${encodeURIComponent(origin)}`)
               .then(finalRes => {
                 expect(finalRes.headers['set-cookie']).toBeUndefined()
-                expect(sanitySession.create).toHaveBeenLastCalledWith(
-                  {
-                    _json: expect.anything(),
-                    _raw: JSON.stringify(googleUser),
-                    displayName: googleUser.displayName,
-                    emails: googleUser.emails,
-                    gender: googleUser.gender,
-                    id: googleUser.id,
-                    name: googleUser.name,
-                    photos: [
-                      {
-                        value: googleUser.image.url
-                      }
-                    ],
-                    provider: 'google'
-                  }
-                )
               })
           })
         })

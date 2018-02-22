@@ -19,7 +19,7 @@ module.exports = {
 
   sanitySession: {
     userIdHashSalt: 'A secret string to hash the generated sanity User id with',
-    expires: '31557600000' // One year (ms)
+    expires: 31557600000 // One year (ms)
   },
 
   sanityClient: {
