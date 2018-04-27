@@ -100,7 +100,7 @@ const hashUserId = require('./src/util/hashUserId')
 const admins = {
   key: 'admins',
   members: [
-    hashUserId('george.constanza@vandelay.com'),
+    hashUserId('george.costanza@vandelay.com'),
   ]
 }
 
