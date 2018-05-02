@@ -62,7 +62,7 @@ module.exports = {
     const expires = new Date()
     expires.setTime(expires.getTime() + config.sanitySession.expires)
 
-    const session = Object.assign({}, sanityUser, {sessionExpires: expires})
+    const session = Object.assign({}, sanityUser, {sessionExpires: expires.toISOString()})
 
     return client.request({
       uri: '/auth/thirdParty/session',
