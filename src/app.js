@@ -10,6 +10,7 @@ module.exports = config => {
   const app = express()
   app.disable('x-powered-by')
   app.set('trust proxy', true)
+  app.use(bodyParser.urlencoded({extended: false}))
   app.use(bodyParser.json())
 
   // Use own session middleware for passport

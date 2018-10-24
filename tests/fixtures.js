@@ -19,6 +19,9 @@ mockPassportStrategies = {
         'https://www.googleapis.com/auth/userinfo.email',
         'https://www.googleapis.com/auth/userinfo.profile'
       ]
+    },
+    callbackFn: (accessToken, refreshToken, profile, done) => {
+      done(null, profile)
     }
   }
 }
