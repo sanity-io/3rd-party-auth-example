@@ -99,7 +99,7 @@ describe('API', () => {
         })
     })
 
-    it('should return a 500 error, and and destroy the passport session if an unexpected error occurs', () => {
+    it("should return a 502 error if we can't connect to the provider", () => {
       // (in the test here it is unavailable because there are no nock requests registered for this test)
       let cookie
       let location
@@ -115,10 +115,10 @@ describe('API', () => {
               .get(`${config.apiPath}/callback/google?code=${code}&state=${state}`)
               .set('Cookie', cookie)
               .expect('Content-Type', /json/)
-              .expect(500, {
-                statusCode: 500,
-                error: 'Internal Server Error',
-                message: 'An internal server error occurred'
+              .expect(502, {
+                statusCode: 502,
+                error: 'Bad Gateway',
+                message: 'Failed to obtain access token'
               })
               .then(finalRes => {
                 expect(finalRes.headers['set-cookie']).toBeUndefined()

@@ -16,13 +16,19 @@ module.exports = (err, req, res, next) => {
 function errorResponse(res, err) {
   let error = err
 
-  if (!err.isBoom) {
-    error = Boom.wrap(err)
+  if (err.isJoi) {
+    error = Boom.boomify(err, 400)
+  }
+
+  // Make some sense out of passport auth errors (show the error message)
+  if (['GooglePlusAPIError', 'SanityOAuthApiError', 'InternalOAuthError'].includes(err.name)) {
+    error = Boom.badGateway(err.message)
+  } else if (!err.isBoom) {
+    error = Boom.boomify(err)
   }
 
   const code = Number(err.code || (error.output && error.output.statusCode))
   const statusCode = isNaN(code) ? 500 : code
   res.status(statusCode).json(error.output.payload)
-
   return error
 }
