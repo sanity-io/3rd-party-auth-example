@@ -49,6 +49,10 @@ They are configured in ``./config/passport-providers.js``.
 
 See ``./config/passport-providers.example.js`` for an example.
 
+NOTE: How the ``callbackFn`` is configured in ``./config/passport-providers.js`` varies between Passport strategies (function signature may vary). But all should return a function calling ``done(err, profile)`` with the final Passport [profile object](http://www.passportjs.org/docs/profile/).
+
+The resulting Passport profile must at least contain a ``displayName`` and an ``email`` array to be accepted by the endpoint creating the Sanity third party user object.
+
 ### Application
 
 See ``./config/index.js`` for related config variables for this example application.
