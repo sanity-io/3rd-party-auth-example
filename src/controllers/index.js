@@ -9,6 +9,7 @@ const router = express.Router()
 router.get('/login/:providerName', validateOrigin, login)
 
 router.get('/callback/:providerName', callback)
+router.post('/callback/:providerName', callback)
 
 router.get('/apiadmin/ping', (req, res) => {
   let message = 'OK ' + pckage.version
