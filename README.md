@@ -49,9 +49,14 @@ They are configured in ``./config/passport-providers.js``.
 
 See ``./config/passport-providers.example.js`` for an example.
 
+NOTE: The `name` property in the config must match what the strategy identifies itself with within Passort, or you will get an error with 'unknown authentication strategy'. See the documentation for the strategy in question for what it identifies with to Passport. It is the string which `passport.authenticate` is called with.
+
 NOTE: How the ``callbackFn`` is configured in ``./config/passport-providers.js`` varies between Passport strategies (function signature may vary). But all should return a function calling ``done(err, profile)`` with the final Passport [profile object](http://www.passportjs.org/docs/profile/).
 
 The resulting Passport profile must at least contain a ``displayName`` and an ``email`` array to be accepted by the endpoint creating the Sanity third party user object.
+
+#### CAVEAT
+In the example application we assume that all the Passport strategy modules are prefixed with `passport-` which is the common naming pattern for Passport strategy modules. They are imported like ``require(`passport-${key}`)`` in ``middleware/passport.js`` for convenience reasons (easily test different strategies just based on config). If your wanted strategy module name is not prefixed with `passport-`, you will need to tweak ``middleware/passport.js`` to require the module in an appropriate way.
 
 ### Application
 

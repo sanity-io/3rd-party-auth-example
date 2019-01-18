@@ -6,7 +6,7 @@ module.exports = {
   // Example Google strategy
   // This is using the Passport Strategy npm module: passport-google-oauth20
   'google-oauth20': {
-    name: 'google',
+    name: 'google', // Should match what the strategy identifies with for the passport.authenticate function
     title: 'Google',
     config: {
       clientID: "xxx-yyy.apps.googleusercontent.com",
@@ -28,7 +28,7 @@ module.exports = {
   // Example SAML strategy configured against okta.com
   // This is using the Passport Strategy npm module:: passport-saml
   'saml': {
-    name: 'saml',
+    name: 'saml', // Should match what the strategy identifies with for the passport.authenticate function
     title: 'Okta',
     config: {
       path: `${config.baseUrl}/${config.apiPath}/callback/saml`,
