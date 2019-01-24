@@ -12,6 +12,7 @@ module.exports = {
       clientID: "xxx-yyy.apps.googleusercontent.com",
       clientSecret: "zzzxxx",
       callbackURL: `${config.baseUrl}/${config.apiPath}/callback/google`,
+      userProfileURL: 'https://www.googleapis.com/oauth2/v3/userinfo',
       state: true,
       scope: [
         'https://www.googleapis.com/auth/userinfo.email',
