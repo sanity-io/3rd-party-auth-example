@@ -30,9 +30,9 @@ If you are just doing TDD, it will fallback to a memory store, and Redis will no
 
 
 ```bash
-  yarn install
-  yarn test
-  yarn dev // Start development server
+  npm i
+  npm run test
+  npm run dev // Start development server
 ```
 
 ## Configuration

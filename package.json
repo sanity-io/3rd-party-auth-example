@@ -39,7 +39,7 @@
     "valid-url": "^1.0.9"
   },
   "devDependencies": {
-    "jest": "^23.6.0",
+    "jest": "^25.0.0",
     "mockdate": "^2.0.2",
     "nock": "^10.0.1",
     "nodemon": "^1.14.10",
